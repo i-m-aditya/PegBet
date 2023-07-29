@@ -19,29 +19,29 @@ contract SemifungibleTokenTest is Test {
         sft = new SemifungibleToken(ERC20(USDC), "SFT", "sft");
     }
 
-    // function testHuntForAirdrop() public {
-    //     uint256 usdcBalance = ERC20(USDC).balanceOf(user1);
-    //     emit log_named_uint("USDC balance", usdcBalance);
-    //     uint256 amount = 100 * 10 ** 6;
-    //     emit log_named_uint("amount", amount);
-    //     vm.startPrank(user1);
+    function testHuntForAirdrop() public {
+        uint256 usdcBalance = ERC20(USDC).balanceOf(user1);
+        emit log_named_uint("USDC balance", usdcBalance);
+        uint256 amount = 100 * 10 ** 6;
+        emit log_named_uint("amount", amount);
+        vm.startPrank(user1);
 
-    //     assert(ERC20(USDC).approve(user2, amount));
-    //     uint256 allowance = ERC20(USDC).allowance(user1, user2);
-    //     emit log_named_uint("allowance", allowance);
+        assert(ERC20(USDC).approve(user2, amount));
+        uint256 allowance = ERC20(USDC).allowance(user1, user2);
+        emit log_named_uint("allowance", allowance);
 
-    //     msgSenderTest.msgSender(user1);
+        msgSenderTest.msgSender(user1);
 
-    //     ERC20(USDC).transfer(user2, amount);
+        ERC20(USDC).transfer(user2, amount);
 
-    //     assert(ERC20(USDC).balanceOf(user2) > amount);
+        assert(ERC20(USDC).balanceOf(user2) > amount);
 
-    //     // airdrop.hunt_for_airdrop{value: 2 ether}( address(0x4E53051c6Bd7dA2Ad2aa22430AD8543431007D23));
-    //     // emit log_string("Post");
+        // airdrop.hunt_for_airdrop{value: 2 ether}( address(0x4E53051c6Bd7dA2Ad2aa22430AD8543431007D23));
+        // emit log_string("Post");
 
-    //     vm.stopPrank();
-    //     assert(true);
-    // }
+        vm.stopPrank();
+        assert(true);
+    }
 
     function testSft() public {
         uint256 amount = 100 * 10 ** 6;
