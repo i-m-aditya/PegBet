@@ -1,0 +1,5 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "solidity.defaultCompiler": "localNodeModule",
+    "eslint.enable": false
+}
