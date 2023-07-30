@@ -71,12 +71,12 @@ contract SemifungibleTokenTest is Test {
 
         ERC20(USDC).approve(address(this), amount);
         ERC20(USDC).transfer(address(this), amount);
+        msgSenderTest.msgSender(user1);
         vm.stopPrank();
 
         ERC20(USDC).approve(address(sft), amount);
 
         // test
-        msgSenderTest.msgSender(user1);
 
         emit log_string("Pre call");
 
