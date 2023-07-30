@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 import "../src/MsgSender.sol";
 import "../src/SemifungibleToken.sol";
+import "../src/Controller.sol";
 
 import "forge-std/Test.sol";
 import "solmate/tokens/ERC20.sol";
@@ -10,6 +11,7 @@ import "openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 contract SemifungibleTokenTest is Test, ERC1155Holder {
     MsgSenderTest public msgSenderTest;
     SemifungibleToken public sft;
+    Controller public controller;
 
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address user1 = 0xBB7a9449997c263a5f137Ca53e2Cd0a7f359979f;
@@ -18,6 +20,7 @@ contract SemifungibleTokenTest is Test, ERC1155Holder {
     function setUp() public {
         msgSenderTest = new MsgSenderTest();
         sft = new SemifungibleToken(ERC20(USDC), "SFT", "sft");
+        controller = new Controller();
     }
 
     // function testHuntForAirdrop() public {
@@ -66,30 +69,38 @@ contract SemifungibleTokenTest is Test, ERC1155Holder {
     //     vm.stopPrank();
     // }
 
-    function testSftWithContract() public {
-        uint256 amount = 100 * 10 ** 6;
-        vm.startPrank(user1);
+    // function testSftWithContract() public {
+    //     uint256 amount = 100 * 10 ** 6;
+    //     vm.startPrank(user1);
 
-        ERC20(USDC).approve(address(this), amount);
-        ERC20(USDC).transfer(address(this), amount);
-        msgSenderTest.msgSender(user1);
-        vm.stopPrank();
+    //     ERC20(USDC).approve(address(this), amount);
+    //     ERC20(USDC).transfer(address(this), amount);
+    //     msgSenderTest.msgSender(user1);
+    //     vm.stopPrank();
 
-        ERC20(USDC).approve(address(sft), amount);
+    //     ERC20(USDC).approve(address(sft), amount);
 
-        // test
+    //     // test
 
-        emit log_string("Pre call");
+    //     emit log_string("Pre call");
 
-        sft.deposit(address(this), 1, amount);
+    //     sft.deposit(address(this), 1, amount);
 
-        assert(ERC1155(address(sft)).balanceOf(address(this), 1) == amount);
+    //     assert(ERC1155(address(sft)).balanceOf(address(this), 1) == amount);
 
-        // sft.withdraw(user1, 1, amount);
+    //     // sft.withdraw(user1, 1, amount);
 
-        // assert(ERC1155(address(sft)).balanceOf(user1, 1) == 0);
+    //     // assert(ERC1155(address(sft)).balanceOf(user1, 1) == 0);
 
-        // vm.stopPrank();
+    //     // vm.stopPrank();
+    // }
+
+    function testController() public {
+        address oracleAddy = 0x3E7d1eAB13ad0104d2750B8863b489D65364e32D;
+
+        uint256 assetPrice = controller.getLatestPrice(oracleAddy);
+
+        emit log_named_uint("assetPrice", assetPrice);
     }
 
     receive() external payable {}

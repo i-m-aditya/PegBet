@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {AggregatorV3Interface} from "chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract Controller {
-    constructor(address _priceFeed) {
+    constructor() {
         // priceFeed = AggregatorV2V3Interface(_priceFeed);
     }
 
