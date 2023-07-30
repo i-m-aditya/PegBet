@@ -65,27 +65,29 @@ contract SemifungibleTokenTest is Test {
         vm.stopPrank();
     }
 
-    // function testSftWithContract() public {
-    //     uint256 amount = 100 * 10 ** 6;
-    //     vm.startPrank(user1);
+    function testSftWithContract() public {
+        uint256 amount = 100 * 10 ** 6;
+        vm.startPrank(user1);
 
-    //     ERC20(USDC).approve(address(this), amount);
+        ERC20(USDC).approve(address(this), amount);
+        ERC20(USDC).transfer(address(this), amount);
+        vm.stopPrank();
 
-    //     uint256 allowance = ERC20(USDC).allowance(user1, address(this));
-    //     emit log_named_uint("allowance", allowance);
+        ERC20(USDC).approve(address(sft), amount);
 
-    //     msgSenderTest.msgSender(user1);
+        // test
+        msgSenderTest.msgSender(user1);
 
-    //     sft.deposit(user1, 1, amount);
+        sft.deposit(address(this), 1, amount);
 
-    //     assert(ERC1155(address(sft)).balanceOf(user1, 1) == amount);
+        // assert(ERC1155(address(sft)).balanceOf(user1, 1) == amount);
 
-    //     sft.withdraw(user1, 1, amount);
+        // sft.withdraw(user1, 1, amount);
 
-    //     assert(ERC1155(address(sft)).balanceOf(user1, 1) == 0);
+        // assert(ERC1155(address(sft)).balanceOf(user1, 1) == 0);
 
-    //     vm.stopPrank();
-    // }
+        vm.stopPrank();
+    }
 
     receive() external payable {}
 }
