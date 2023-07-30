@@ -5,8 +5,9 @@ import "../src/SemifungibleToken.sol";
 
 import "forge-std/Test.sol";
 import "solmate/tokens/ERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
-contract SemifungibleTokenTest is Test {
+contract SemifungibleTokenTest is Test, ERC1155Holder {
     MsgSenderTest public msgSenderTest;
     SemifungibleToken public sft;
 
