@@ -2,9 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "./PartialFungibleVault.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
-contract Vault is PartialFungibleVault {
+contract Vault is PartialFungibleVault, ReentrancyGuard {
     using FixedPointMathLib for uint256;
 
     uint256 public strikePrice;
@@ -65,7 +66,11 @@ contract Vault is PartialFungibleVault {
         hasEpochEnded[_expiry] = true;
     }
 
-    function deposit(uint256 amount, uint256 id, address receiver) public {
+    function deposit(
+        uint256 amount,
+        uint256 id,
+        address receiver
+    ) public nonReentrant {
         require(amount > 0, "Vault: amount must be greater than 0");
         require(
             hasEpochEnded[id] == false,
@@ -74,7 +79,10 @@ contract Vault is PartialFungibleVault {
         super.deposit(receiver, id, amount);
     }
 
-    function depositEth(uint256 id, address receiver) public payable {
+    function depositEth(
+        uint256 id,
+        address receiver
+    ) public payable nonReentrant {
         require(msg.value > 0, "Vault: amount must be greater than 0");
         require(
             hasEpochEnded[id] == false,
@@ -97,20 +105,18 @@ contract Vault is PartialFungibleVault {
         if (owner != msg.sender) revert SenderNotOwner();
 
         _burn(owner, id, amount);
-        // transfer receivers earning
+
+        uint256 eligibleAmount = withdrawConversion(id, amount);
+        asset.transfer(receiver, eligibleAmount);
     }
 
-    // function withdrawConversion(
-
-    // ) public {
-    //     require(amount > 0, "Vault: amount must be greater than 0");
-    //     require(
-    //         hasEpochEnded[id] == true,
-    //         "Vault: epoch has not ended, cannot withdraw"
-    //     );
-    //     if (owner != msg.sender) revert SenderNotOwner();
-
-    //     _burn(owner, id, amount);
-    //     // transfer receivers earning
-    // }
+    function withdrawConversion(
+        uint256 epochId,
+        uint256 amount
+    ) public view returns (uint256 eligibleWithdraw) {
+        eligibleWithdraw = amount.mulDivUp(
+            preEpochTVL[epochId],
+            postEpochTVL[epochId]
+        );
+    }
 }
