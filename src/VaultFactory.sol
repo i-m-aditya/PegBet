@@ -28,14 +28,14 @@ contract VaultFactory {
     //     uint256 startEpoch;
     //     uint256 endEpoch;
     // }
-    mapping(uint256 => address[]) public marketVaults;
+    mapping(uint256 => address payable[]) public marketVaults;
 
     function createNewMarket(
         ERC20 _asset,
         string memory _name, // PGB-MIM-998-epoch#RISK
         string memory _symbol, // pgb-mim
         address _oracle,
-        uint256 _strikePrice, // strike price multiplied by 10**8
+        int256 _strikePrice, // strike price multiplied by 10**8
         uint256 startEpoch,
         uint256 endEpoch
     ) external onlyOwner returns (address) {
@@ -67,7 +67,10 @@ contract VaultFactory {
         //     startEpoch,
         //     endEpoch
         // );
-        marketVaults[marketId] = [address(riskVault), address(premiumVault)];
+        marketVaults[marketId] = [
+            payable(address(riskVault)),
+            payable(address(premiumVault))
+        ];
 
         marketId += 1;
     }
@@ -77,8 +80,8 @@ contract VaultFactory {
         uint256 endEpoch,
         uint256 _marketId
     ) internal {
-        Vault riskVault = Vault(payable(marketVaults[_marketId][0]));
-        Vault premiumVault = Vault(payable(marketVaults[_marketId][1]));
+        Vault riskVault = Vault(marketVaults[_marketId][0]);
+        Vault premiumVault = Vault(marketVaults[_marketId][1]);
 
         riskVault.startNewEpoch(endEpoch);
         premiumVault.startNewEpoch(endEpoch);
@@ -86,5 +89,11 @@ contract VaultFactory {
 
     function setController(address _controller) external onlyOwner {
         controller = _controller;
+    }
+
+    function getVaultsForMaketId(
+        uint256 _marketId
+    ) external view returns (address payable[] memory) {
+        return marketVaults[_marketId];
     }
 }

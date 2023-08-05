@@ -8,14 +8,14 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 contract Vault is PartialFungibleVault, ReentrancyGuard {
     using FixedPointMathLib for uint256;
 
-    uint256 public strikePrice;
+    int256 public strikePrice;
     address public oracle;
     address public controller;
 
     uint256[] public epochs;
 
-    mapping(uint256 => uint256) vaultFinalTVL;
-    mapping(uint256 => uint256) vaultClaimabeTVL;
+    mapping(uint256 => uint256) public vaultFinalTVL;
+    mapping(uint256 => uint256) public vaultClaimabeTVL;
 
     // mapping(uint256 => bool) hasEpochStarted;
     mapping(uint256 => uint8) epochState;
@@ -37,7 +37,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         string memory _name, // PGB-MIM-998-epoch#RISK
         string memory _symbol, // pgb-mim
         address _oracle,
-        uint256 _strikePrice, // strike price multiplied by 10**8
+        int256 _strikePrice, // strike price multiplied by 10**8
         address _controller // unix timestamp of expiry
     ) PartialFungibleVault(_asset, _name, _symbol) {
         strikePrice = _strikePrice;
@@ -62,7 +62,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
 
     function setEpochState(
         uint256 _epochId,
-        uint256 state
+        uint8 state
     ) public onlyController {
         require(isEpochIdValid[_epochId], "Vault: epoch id is not valid");
         epochState[_epochId] = state;
