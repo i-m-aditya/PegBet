@@ -6,7 +6,11 @@ import {AggregatorV3Interface} from "chainlink/contracts/src/v0.8/interfaces/Agg
 // import {EACAggregatorProxy} from "chainlink/contracts/src/v0.8/EACAggregatorProxy.sol";
 
 contract Controller {
-    constructor() {}
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
 
     event Log(string message);
     event Log2(uint80 message);
@@ -21,5 +25,10 @@ contract Controller {
         // emit Log("getLatestPrice");
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return uint256(price);
+    }
+
+    function triggerDepeg(uint256 epochId) public {
+        emit Log("triggerDepeg");
+        emit Log2(uint80(epochId));
     }
 }

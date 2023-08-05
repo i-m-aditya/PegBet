@@ -12,15 +12,14 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     address public oracle;
     address public controller;
 
-    string public vaultType;
-
     uint256[] public epochs;
 
-    mapping(uint256 => uint256) preEpochTVL;
-    mapping(uint256 => uint256) postEpochTVL;
+    mapping(uint256 => uint256) vaultFinalTVL;
+    mapping(uint256 => uint256) vaultClaimabeTVL;
 
     // mapping(uint256 => bool) hasEpochStarted;
-    mapping(uint256 => bool) hasEpochEnded;
+    mapping(uint256 => uint8) epochState;
+    mapping(uint256 => bool) isEpochIdValid;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -39,13 +38,11 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         string memory _symbol, // pgb-mim
         address _oracle,
         uint256 _strikePrice, // strike price multiplied by 10**8
-        address _controller, // unix timestamp of expiry
-        string memory _vaultType
+        address _controller // unix timestamp of expiry
     ) PartialFungibleVault(_asset, _name, _symbol) {
         strikePrice = _strikePrice;
         oracle = _oracle;
         controller = _controller;
-        vaultType = _vaultType;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -57,13 +54,18 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         _;
     }
 
-    function createMarketForNewExpiry(uint256 _expiry) public onlyController {
-        hasEpochEnded[_expiry] = false;
-        epochs.push(_expiry);
+    function startNewEpoch(uint256 endEpoch) public {
+        epochState[endEpoch] = 0;
+        epochs.push(endEpoch);
+        isEpochIdValid[endEpoch] = true;
     }
 
-    function endEpoch(uint256 _expiry) public onlyController {
-        hasEpochEnded[_expiry] = true;
+    function setEpochState(
+        uint256 _epochId,
+        uint256 state
+    ) public onlyController {
+        require(isEpochIdValid[_epochId], "Vault: epoch id is not valid");
+        epochState[_epochId] = state;
     }
 
     function deposit(
@@ -72,10 +74,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         address receiver
     ) public nonReentrant {
         require(amount > 0, "Vault: amount must be greater than 0");
-        require(
-            hasEpochEnded[id] == false,
-            "Vault: epoch has ended, cannot deposit"
-        );
+        require(epochState[id] == 0, "Vault: Deposit period over");
         super.deposit(receiver, id, amount);
     }
 
@@ -84,10 +83,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         address receiver
     ) public payable nonReentrant {
         require(msg.value > 0, "Vault: amount must be greater than 0");
-        require(
-            hasEpochEnded[id] == false,
-            "Vault: epoch has ended, cannot deposit"
-        );
+        require(epochState[id] == 0, "Vault: Deposit period over");
         super.deposit(receiver, id, msg.value);
     }
 
@@ -99,7 +95,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     ) public {
         require(amount > 0, "Vault: amount must be greater than 0");
         require(
-            hasEpochEnded[id] == true,
+            epochState[id] == true,
             "Vault: epoch has not ended, cannot withdraw"
         );
         if (owner != msg.sender) revert SenderNotOwner();
@@ -115,8 +111,8 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         uint256 amount
     ) public view returns (uint256 eligibleWithdraw) {
         eligibleWithdraw = amount.mulDivUp(
-            preEpochTVL[epochId],
-            postEpochTVL[epochId]
+            vaultFinalTVL[epochId],
+            vaultClaimabeTVL[epochId]
         );
     }
 }
