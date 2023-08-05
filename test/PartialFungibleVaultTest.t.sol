@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 import "../src/MsgSender.sol";
 import "../src/Controller.sol";
 import "../src/Pegbet.sol";
+import "../src/PartialFungibleVault.sol";
 
 import "forge-std/Test.sol";
 import "solmate/tokens/ERC20.sol";
@@ -10,8 +11,8 @@ import "openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 contract PartialFungibleVaultTest is Test, ERC1155Holder {
     MsgSenderTest public msgSenderTest;
-    SemifungibleToken public sft;
-    Controller public controller;
+    PartialFungibleVault public pfv;
+    // Controller public controller;
     Pegbet public pegbet;
 
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
@@ -20,8 +21,8 @@ contract PartialFungibleVaultTest is Test, ERC1155Holder {
 
     function setUp() public {
         msgSenderTest = new MsgSenderTest();
-        sft = new SemifungibleToken(ERC20(USDC), "SFT", "sft");
-        controller = new Controller();
+        pfv = new PartialFungibleVault(ERC20(USDC), "SFT", "sft");
+        // controller = new Controller();
         pegbet = new Pegbet("Pegbet", "pegbet", 18);
     }
 
@@ -97,13 +98,13 @@ contract PartialFungibleVaultTest is Test, ERC1155Holder {
     //     // vm.stopPrank();
     // }
 
-    function testController() public {
-        address oracleAddy = 0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7;
+    // function testController() public {
+    //     address oracleAddy = 0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7;
 
-        uint256 assetPrice = controller.getLatestPrice(oracleAddy);
+    //     uint256 assetPrice = controller.getLatestPrice(oracleAddy);
 
-        emit log_named_uint("assetPrice", assetPrice);
-    }
+    //     emit log_named_uint("assetPrice", assetPrice);
+    // }
 
     receive() external payable {}
 }

@@ -79,9 +79,7 @@ contract Controller {
         premiumVault.setEpochState(marketId, 2);
     }
 
-    function expireEpochWithoutDepeg(
-        uint256 marketId
-    ) public onlyOwner returns (uint256) {
+    function expireEpochWithoutDepeg(uint256 marketId) public onlyOwner {
         VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
 
         address payable[] memory marketVaults = vaultFactory
@@ -98,6 +96,24 @@ contract Controller {
             marketId,
             premiumFinalTVL + riskFinalTVL
         );
+
+        riskVault.setEpochState(marketId, 2);
+        premiumVault.setEpochState(marketId, 2);
+    }
+
+    function expireNullEpoch(uint256 marketId) public onlyOwner {
+        VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
+        address payable[] memory marketVaults = vaultFactory
+            .getVaultsForMaketId(marketId);
+
+        Vault riskVault = Vault(marketVaults[0]);
+        Vault premiumVault = Vault(marketVaults[1]);
+
+        uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(marketId);
+        uint256 riskFinalTVL = riskVault.vaultFinalTVL(marketId);
+
+        premiumVault.setVaultClaimableTVL(marketId, premiumFinalTVL);
+        riskVault.setVaultClaimableTVL(marketId, riskFinalTVL);
 
         riskVault.setEpochState(marketId, 2);
         premiumVault.setEpochState(marketId, 2);
