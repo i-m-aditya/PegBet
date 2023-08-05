@@ -95,7 +95,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     ) public {
         require(amount > 0, "Vault: amount must be greater than 0");
         require(
-            epochState[id] == true,
+            epochState[id] == 2,
             "Vault: epoch has not ended, cannot withdraw"
         );
         if (owner != msg.sender) revert SenderNotOwner();
@@ -114,5 +114,13 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
             vaultFinalTVL[epochId],
             vaultClaimabeTVL[epochId]
         );
+    }
+
+    function setVaultClaimableTVL(
+        uint256 epochId,
+        uint256 _vaultClaimableTVL
+    ) public onlyController {
+        require(isEpochIdValid[epochId], "Vault: epoch id is not valid");
+        vaultClaimabeTVL[epochId] = _vaultClaimableTVL;
     }
 }

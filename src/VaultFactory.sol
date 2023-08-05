@@ -7,10 +7,12 @@ contract VaultFactory {
     // Will hardcode it
     address public owner;
 
-    uint256 public pegIndex;
+    address public controller;
+
+    uint256 public marketId;
 
     constructor() {
-        pegIndex = 0;
+        marketId = 0;
         // setting deployer as owner
         owner = msg.sender;
     }
@@ -20,13 +22,13 @@ contract VaultFactory {
         _;
     }
 
-    struct PegbetMarket {
-        Vault riskVault;
-        Vault premiumVault;
-    }
-
-    mapping(uint256 => address[]) public pegMarkets;
-    mapping(uint256 => PegbetMarket) public pegbetMarkets;
+    // struct PegbetMarket {
+    //     Vault riskVault;
+    //     Vault premiumVault;
+    //     uint256 startEpoch;
+    //     uint256 endEpoch;
+    // }
+    mapping(uint256 => address[]) public marketVaults;
 
     function createNewMarket(
         ERC20 _asset,
@@ -59,20 +61,30 @@ contract VaultFactory {
             controller
         );
 
-        pegbetMarkets[pegIndex] = PegbetMarket(riskVault, premiumVault);
-        _startNewEpoch(startEpoch, endEpoch, pegIndex);
-        pegIndex += 1;
+        // indexMarkets[marketId] = PegbetMarket(
+        //     riskVault,
+        //     premiumVault,
+        //     startEpoch,
+        //     endEpoch
+        // );
+        marketVaults[marketId] = [address(riskVault), address(premiumVault)];
+
+        marketId += 1;
     }
 
     function _startNewEpoch(
         uint256 startEpoch,
         uint256 endEpoch,
-        uint256 _pegIndex
+        uint256 _marketId
     ) internal {
-        Vault riskVault = pegbetMarkets[_pegIndex].riskVault;
-        Vault premiumVault = pegbetMarkets[_pegIndex].premiumVault;
+        Vault riskVault = Vault(payable(marketVaults[_marketId][0]));
+        Vault premiumVault = Vault(payable(marketVaults[_marketId][1]));
 
         riskVault.startNewEpoch(endEpoch);
         premiumVault.startNewEpoch(endEpoch);
+    }
+
+    function setController(address _controller) external onlyOwner {
+        controller = _controller;
     }
 }
