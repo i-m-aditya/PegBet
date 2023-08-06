@@ -21,12 +21,16 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     mapping(uint256 => uint8) epochState;
     mapping(uint256 => bool) isEpochIdValid;
 
+    mapping(uint256 => uint256[]) public epochSpan;
+
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
     //////////////////////////////////////////////////////////////*/
 
     error AddressZero();
     error SenderNotOwner();
+    error DepositPeriodEnded();
+    error WithdrawPeriodNotStarted();
 
     /*//////////////////////////////////////////////////////////////
                                 CONSTRUCTOR
@@ -54,7 +58,8 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         _;
     }
 
-    function startNewEpoch(uint256 endEpoch) public {
+    function startNewEpoch(uint256 startEpoch, uint256 endEpoch) public {
+        epochSpan[endEpoch] = [startEpoch, endEpoch];
         epochState[endEpoch] = 0;
         epochs.push(endEpoch);
         isEpochIdValid[endEpoch] = true;
@@ -74,8 +79,15 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         address receiver
     ) public nonReentrant {
         require(amount > 0, "Vault: amount must be greater than 0");
-        require(epochState[id] == 0, "Vault: Deposit period over");
-        super.deposit(receiver, id, amount);
+
+        if (
+            epochSpan[id][0] <= block.timestamp &&
+            epochSpan[id][0] + 2 days > block.timestamp
+        ) {
+            super.deposit(receiver, id, amount);
+        } else {
+            revert DepositPeriodEnded();
+        }
     }
 
     function depositEth(
@@ -94,11 +106,11 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         address receiver
     ) public {
         require(amount > 0, "Vault: amount must be greater than 0");
-        require(
-            epochState[id] == 2,
-            "Vault: epoch has not ended, cannot withdraw"
-        );
         if (owner != msg.sender) revert SenderNotOwner();
+
+        if (block.timestamp < epochSpan[id][1]) {
+            revert WithdrawPeriodNotStarted();
+        }
 
         _burn(owner, id, amount);
 
