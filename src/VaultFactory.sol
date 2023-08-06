@@ -75,6 +75,21 @@ contract VaultFactory {
         return marketVaults[marketId];
     }
 
+    function deployNewExpiryForExistingVault(
+        uint256 _marketId,
+        uint256 startEpoch,
+        uint256 endEpoch
+    ) public onlyOwner returns (address payable[] memory) {
+        require(
+            startEpoch < endEpoch,
+            "VaultFactory: startEpoch must be less than endEpoch"
+        );
+
+        _startNewEpoch(startEpoch, endEpoch, _marketId);
+
+        return marketVaults[_marketId];
+    }
+
     function _startNewEpoch(
         uint256 startEpoch,
         uint256 endEpoch,
@@ -83,8 +98,8 @@ contract VaultFactory {
         Vault riskVault = Vault(marketVaults[_marketId][0]);
         Vault premiumVault = Vault(marketVaults[_marketId][1]);
 
-        riskVault.startNewEpoch(endEpoch);
-        premiumVault.startNewEpoch(endEpoch);
+        riskVault.startNewEpoch(startEpoch, endEpoch);
+        premiumVault.startNewEpoch(startEpoch, endEpoch);
     }
 
     function setController(address _controller) external onlyOwner {
