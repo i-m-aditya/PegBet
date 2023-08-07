@@ -45,8 +45,8 @@ contract VaultFactory {
         );
         Vault riskVault = new Vault(
             _asset,
-            string(abi.encodePacked(_name, "-RISK")),
-            _symbol,
+            string(abi.encodePacked(_name, "#RISK")),
+            string(abi.encodePacked(_symbol, "#risk")),
             _oracle,
             _strikePrice,
             controller
@@ -54,8 +54,8 @@ contract VaultFactory {
 
         Vault premiumVault = new Vault(
             _asset,
-            string(abi.encodePacked(_name, "-PREMIUM")),
-            _symbol,
+            string(abi.encodePacked(_name, "#PREMIUM")),
+            string(abi.encodePacked(_symbol, "#premium")),
             _oracle,
             _strikePrice,
             controller

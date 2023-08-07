@@ -41,7 +41,7 @@ contract Controller {
         return uint256(price);
     }
 
-    function triggerDepeg(uint256 marketId) public onlyOwner returns (uint256) {
+    function triggerDepeg(uint256 marketId) public onlyOwner {
         // address usdcAddress = 0x3E7d1eAB13ad0104d2750B8863b489D65364e32D;
         VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
 
