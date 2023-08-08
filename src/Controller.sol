@@ -46,7 +46,7 @@ contract Controller {
         return uint256(price);
     }
 
-    function triggerDepeg(uint256 marketId) public onlyOwner {
+    function triggerDepeg(uint256 marketId, uint256 epochId) public onlyOwner {
         // address usdcAddress = 0x3E7d1eAB13ad0104d2750B8863b489D65364e32D;
         VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
 
@@ -69,19 +69,19 @@ contract Controller {
         (, int256 price, , , ) = priceFeed.latestRoundData();
 
         require(
-            price <= riskVault.strikePrice(),
-            "Controller: price is less than strike price"
+            price < riskVault.strikePrice(),
+            "Controller: price is more than strike price"
         );
 
-        uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(marketId);
-        uint256 riskFinalTVL = riskVault.vaultFinalTVL(marketId);
+        uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(epochId);
+        uint256 riskFinalTVL = riskVault.vaultFinalTVL(epochId);
 
-        premiumVault.setVaultClaimableTVL(marketId, riskFinalTVL);
-        riskVault.setVaultClaimableTVL(marketId, premiumFinalTVL);
+        premiumVault.setVaultClaimableTVL(epochId, riskFinalTVL);
+        riskVault.setVaultClaimableTVL(epochId, premiumFinalTVL);
 
         // End Epoch after depeging
-        riskVault.setEpochState(marketId, 2);
-        premiumVault.setEpochState(marketId, 2);
+        riskVault.setEpochState(epochId, 2);
+        premiumVault.setEpochState(epochId, 2);
     }
 
     function expireEpochWithoutDepeg(uint256 marketId) public onlyOwner {

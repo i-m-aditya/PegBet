@@ -22,12 +22,12 @@ contract VaultFactory {
         _;
     }
 
-    // struct PegbetMarket {
-    //     Vault riskVault;
-    //     Vault premiumVault;
-    //     uint256 startEpoch;
-    //     uint256 endEpoch;
-    // }
+    struct PegbetMarket {
+        Vault riskVault;
+        Vault premiumVault;
+        uint256 startEpoch;
+        uint256 endEpoch;
+    }
     mapping(uint256 => address payable[]) public marketVaults;
 
     function createNewMarket(

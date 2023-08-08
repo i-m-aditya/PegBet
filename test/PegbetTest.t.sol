@@ -21,6 +21,7 @@ contract PegbetTest is Test, ERC1155Holder {
         vaultFactory = new VaultFactory();
         controller = new Controller(address(vaultFactory));
         pegbet = new Pegbet("Pegbet", "pegbet", 18);
+        vaultFactory.setController(address(controller));
     }
 
     function testVaultCreation() public {
@@ -39,7 +40,7 @@ contract PegbetTest is Test, ERC1155Holder {
             "PGB-frax-998-epoch",
             "pgb-frax-998-epoch",
             address(0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8),
-            998,
+            99900000,
             1691433528,
             1691433528 + 7 days
         );
@@ -72,14 +73,11 @@ contract PegbetTest is Test, ERC1155Holder {
         );
 
         emit log_named_uint("fraxLatestPrice", fraxLatestPrice);
+        int256 sp = riskVault.strikePrice();
 
-        emit log_named_address("vault factory address", address(vaultFactory));
-        emit log_named_address(
-            "controller vault factory",
-            controller.getVaultFactoryAddress()
-        );
+        emit log_named_int("strikePrice", sp);
 
-        controller.triggerDepeg(marketId);
+        controller.triggerDepeg(marketId, endDate);
 
         assert(riskVault.balanceOf(user1, endDate) == 0);
     }
