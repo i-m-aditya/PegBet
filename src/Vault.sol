@@ -107,7 +107,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
             (epochSpan[id][0] <= block.timestamp &&
                 epochSpan[id][0] + 2 days > block.timestamp)
         ) {
-            super.deposit(receiver, id, msg.value);
+            mint(receiver, id, msg.value, "");
         } else {
             revert DepositPeriodEnded();
         }
