@@ -38,7 +38,7 @@ contract VaultFactory {
         int256 _strikePrice, // strike price multiplied by 10**8
         uint256 startEpoch,
         uint256 endEpoch
-    ) external onlyOwner returns (address payable[] memory) {
+    ) external onlyOwner returns (uint256) {
         require(
             startEpoch < endEpoch,
             "VaultFactory: startEpoch must be less than endEpoch"
@@ -73,14 +73,14 @@ contract VaultFactory {
             payable(address(premiumVault))
         ];
         _startNewEpoch(startEpoch, endEpoch, marketId);
-        return marketVaults[marketId];
+        return marketId;
     }
 
     function deployNewExpiryForExistingVault(
         uint256 _marketId,
         uint256 startEpoch,
         uint256 endEpoch
-    ) public onlyOwner returns (address payable[] memory) {
+    ) public onlyOwner returns (uint256) {
         require(
             startEpoch < endEpoch,
             "VaultFactory: startEpoch must be less than endEpoch"
@@ -88,7 +88,7 @@ contract VaultFactory {
 
         _startNewEpoch(startEpoch, endEpoch, _marketId);
 
-        return marketVaults[_marketId];
+        return marketId;
     }
 
     function _startNewEpoch(
@@ -107,9 +107,12 @@ contract VaultFactory {
         controller = _controller;
     }
 
+    event MarketVault(address payable[] vaults);
+
     function getVaultsForMaketId(
         uint256 _marketId
-    ) external view returns (address payable[] memory) {
+    ) external returns (address payable[] memory) {
+        emit MarketVault(marketVaults[_marketId]);
         return marketVaults[_marketId];
     }
 }

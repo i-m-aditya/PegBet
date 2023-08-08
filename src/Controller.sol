@@ -16,6 +16,11 @@ contract Controller {
 
     error MarketDoesNotExist();
 
+    // temp
+    function getVaultFactoryAddress() public view returns (address) {
+        return vaultFactoryAddress;
+    }
+
     constructor(address _vaultFactoryAddress) {
         owner = msg.sender;
         vaultFactoryAddress = _vaultFactoryAddress;
@@ -115,8 +120,8 @@ contract Controller {
         premiumVault.setVaultClaimableTVL(marketId, premiumFinalTVL);
         riskVault.setVaultClaimableTVL(marketId, riskFinalTVL);
 
-        riskVault.setEpochState(marketId, 2);
-        premiumVault.setEpochState(marketId, 2);
+        riskVault.setEpochState(marketId, 1);
+        premiumVault.setEpochState(marketId, 1);
     }
 
     function stopDepositsAndStartEpoch(uint256 marketId) public onlyOwner {

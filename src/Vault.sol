@@ -33,6 +33,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     error SenderNotOwner();
     error DepositPeriodEnded();
     error WithdrawPeriodNotStarted();
+    error EpochNotExpired();
 
     /*//////////////////////////////////////////////////////////////
                                 CONSTRUCTOR
@@ -123,6 +124,9 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         if (owner != msg.sender) revert SenderNotOwner();
 
         if (block.timestamp < epochSpan[id][1]) {
+            revert EpochNotExpired();
+        }
+        if (epochState[id] != 1) {
             revert WithdrawPeriodNotStarted();
         }
 

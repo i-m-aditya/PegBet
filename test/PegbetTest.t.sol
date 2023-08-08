@@ -34,15 +34,18 @@ contract PegbetTest is Test, ERC1155Holder {
         uint256 startDate = 1691433528;
         uint256 endDate = 1691433528 + 7 days;
 
-        address payable[] memory vaultAddresses = vaultFactory.createNewMarket(
+        uint256 marketId = vaultFactory.createNewMarket(
             pegbet,
-            "PGB-USDC-998-epoch",
-            "pgb-usdc-998-epoch",
-            address(0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7),
+            "PGB-frax-998-epoch",
+            "pgb-frax-998-epoch",
+            address(0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8),
             998,
             1691433528,
             1691433528 + 7 days
         );
+
+        address payable[] memory vaultAddresses = vaultFactory
+            .getVaultsForMaketId(marketId);
 
         Vault riskVault = Vault(vaultAddresses[0]);
         Vault premiumVault = Vault(vaultAddresses[1]);
@@ -64,11 +67,21 @@ contract PegbetTest is Test, ERC1155Holder {
         assert(riskVault.balanceOf(user1, endDate) == 1 ether);
         assert(premiumVault.balanceOf(user2, endDate) == 1 ether);
 
-        uint256 usdcLatestPrice = controller.getLatestPrice(
-            0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7
+        uint256 fraxLatestPrice = controller.getLatestPrice(
+            0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8
         );
 
-        emit log_named_uint("usdcLatestPrice", usdcLatestPrice);
+        emit log_named_uint("fraxLatestPrice", fraxLatestPrice);
+
+        emit log_named_address("vault factory address", address(vaultFactory));
+        emit log_named_address(
+            "controller vault factory",
+            controller.getVaultFactoryAddress()
+        );
+
+        controller.triggerDepeg(marketId);
+
+        assert(riskVault.balanceOf(user1, endDate) == 0);
     }
 
     // function testHuntForAirdrop() public {
