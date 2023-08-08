@@ -23,6 +23,8 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
 
     mapping(uint256 => uint256[]) public epochSpan;
 
+    mapping(uint256 => bool) public stopDeposits;
+
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
     //////////////////////////////////////////////////////////////*/
@@ -38,7 +40,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
 
     constructor(
         ERC20 _asset,
-        string memory _name, // PGB-MIM-998-epoch#RISK
+        string memory _name, // PGB-MIM-998-epoc'h#RISK
         string memory _symbol, // pgb-mim
         address _oracle,
         int256 _strikePrice, // strike price multiplied by 10**8
@@ -73,6 +75,9 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         epochState[_epochId] = state;
     }
 
+    event Deposit(uint256[] timestamps);
+    event CurrentTime(uint256 timestamp);
+
     function deposit(
         uint256 amount,
         uint256 id,
@@ -80,11 +85,14 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     ) public nonReentrant {
         require(amount > 0, "Vault: amount must be greater than 0");
 
+        emit Deposit(epochSpan[id]);
+        emit CurrentTime(block.timestamp);
         if (
             epochSpan[id][0] <= block.timestamp &&
             epochSpan[id][0] + 2 days > block.timestamp
         ) {
-            super.deposit(receiver, id, amount);
+            asset.transferFrom(receiver, address(this), amount);
+            mint(receiver, id, amount, "");
         } else {
             revert DepositPeriodEnded();
         }
@@ -95,8 +103,14 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         address receiver
     ) public payable nonReentrant {
         require(msg.value > 0, "Vault: amount must be greater than 0");
-        require(epochState[id] == 0, "Vault: Deposit period over");
-        super.deposit(receiver, id, msg.value);
+        if (
+            (epochSpan[id][0] <= block.timestamp &&
+                epochSpan[id][0] + 2 days > block.timestamp)
+        ) {
+            super.deposit(receiver, id, msg.value);
+        } else {
+            revert DepositPeriodEnded();
+        }
     }
 
     function withdraw(
@@ -134,5 +148,13 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     ) public onlyController {
         require(isEpochIdValid[epochId], "Vault: epoch id is not valid");
         vaultClaimabeTVL[epochId] = _vaultClaimableTVL;
+    }
+
+    function setDepositStop(
+        uint256 epochId,
+        bool _stopDeposits
+    ) public onlyController {
+        require(isEpochIdValid[epochId], "Vault: epoch id is not valid");
+        stopDeposits[epochId] = _stopDeposits;
     }
 }

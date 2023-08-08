@@ -22,14 +22,13 @@ contract PartialFungibleVault is ERC1155Supply {
         asset = _asset;
     }
 
-    function deposit(address account, uint256 id, uint256 amount) public {
-        asset.transferFrom(account, address(this), amount);
-        _mint(account, id, amount, "");
-    }
-
-    function withdraw(address account, uint256 id, uint256 amount) public {
-        _burn(account, id, amount);
-        asset.transfer(account, amount);
+    function mint(
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public {
+        _mint(account, id, amount, data);
     }
 
     function totalAssets(uint256 id) public view returns (uint256) {

@@ -72,6 +72,7 @@ contract VaultFactory {
             payable(address(riskVault)),
             payable(address(premiumVault))
         ];
+        _startNewEpoch(startEpoch, endEpoch, marketId);
         return marketVaults[marketId];
     }
 
