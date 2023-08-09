@@ -126,14 +126,12 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
     }
 
     function withdraw(
-        uint256 amount,
         uint256 epochId,
-        address owner,
+        uint256 amount,
         address receiver
     ) public {
-        require(amount > 0, "Vault: amount must be greater than 0");
         require(isEpochValid[epochId] == true, "Vault: market is not valid");
-        if (owner != msg.sender) revert SenderNotOwner();
+        require(amount > 0, "Vault: amount must be greater than 0");
 
         if (block.timestamp < epochSpan[epochId][1]) {
             revert EpochNotExpired();
@@ -142,7 +140,7 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
             revert WithdrawPeriodNotStarted();
         }
 
-        _burn(owner, epochId, amount);
+        _burn(msg.sender, epochId, amount);
 
         uint256 eligibleAmount = withdrawConversion(epochId, amount);
         asset.transfer(receiver, eligibleAmount);
@@ -153,9 +151,14 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         uint256 amount
     ) public view returns (uint256 eligibleWithdraw) {
         eligibleWithdraw = amount.mulDivUp(
-            vaultFinalTVL[epochId],
-            vaultClaimabeTVL[epochId]
+            vaultClaimabeTVL[epochId],
+            vaultFinalTVL[epochId]
         );
+    }
+
+    function setVaultFinalTVL(uint256 epochId) public {
+        require(isEpochValid[epochId], "Vault: epoch id is not valid");
+        vaultFinalTVL[epochId] = asset.balanceOf(address(this));
     }
 
     function setVaultClaimableTVL(

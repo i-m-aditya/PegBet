@@ -34,6 +34,8 @@ contract Controller {
     event Log(string message);
     event Log2(uint80 message);
 
+    event VaultTVL(string vaultType, uint256 tvl);
+
     event DepegTriggered(uint256 marketId, uint256 epochId);
 
     function getLatestPrice(address assetAddress) public returns (uint256) {
@@ -78,6 +80,9 @@ contract Controller {
         uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(epochId);
         uint256 riskFinalTVL = riskVault.vaultFinalTVL(epochId);
 
+        emit VaultTVL("premiumVault", premiumFinalTVL);
+        emit VaultTVL("riskVault", riskFinalTVL);
+
         riskVault.transferAssets(epochId, address(premiumVault), riskFinalTVL);
         premiumVault.transferAssets(
             epochId,
@@ -89,8 +94,8 @@ contract Controller {
         riskVault.setVaultClaimableTVL(epochId, premiumFinalTVL);
 
         // End Epoch after depeging
-        riskVault.setEpochState(epochId, 2);
-        premiumVault.setEpochState(epochId, 2);
+        riskVault.setEpochState(epochId, 1);
+        premiumVault.setEpochState(epochId, 1);
 
         emit DepegTriggered(marketId, epochId);
     }

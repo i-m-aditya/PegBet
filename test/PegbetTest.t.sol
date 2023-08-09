@@ -83,6 +83,9 @@ contract PegbetTest is Test, ERC1155Holder {
 
         emit log_named_int("strikePrice", sp);
 
+        riskVault.setVaultFinalTVL(endDate);
+        premiumVault.setVaultFinalTVL(endDate);
+
         controller.triggerDepeg(marketId, endDate);
 
         emit log_named_uint(
@@ -92,6 +95,27 @@ contract PegbetTest is Test, ERC1155Holder {
         emit log_named_uint(
             "post premium vault balance",
             pegbet.balanceOf(address(premiumVault))
+        );
+
+        uint256 fraxPgbTokensOfUser1 = riskVault.balanceOf(user1, endDate);
+        uint256 fraxPgbTokensOfUser2 = premiumVault.balanceOf(user2, endDate);
+
+        vm.warp(endDate + 1 days);
+
+        vm.prank(user1);
+        riskVault.withdraw(endDate, fraxPgbTokensOfUser1, user1);
+
+        vm.prank(user2);
+        premiumVault.withdraw(endDate, fraxPgbTokensOfUser2, user2);
+
+        emit log_named_uint(
+            "post user1 balance",
+            ERC20(address(pegbet)).balanceOf(user1)
+        );
+
+        emit log_named_uint(
+            "post user2 balance",
+            ERC20(address(pegbet)).balanceOf(user2)
         );
     }
 
