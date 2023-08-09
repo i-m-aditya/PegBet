@@ -86,7 +86,7 @@ contract PegbetTest is Test, ERC1155Holder {
         riskVault.setVaultFinalTVL(endDate);
         premiumVault.setVaultFinalTVL(endDate);
 
-        controller.triggerDepeg(marketId, endDate);
+        controller.expireEpochWithDepeg(marketId, endDate);
 
         emit log_named_uint(
             "post risk vault balance",
