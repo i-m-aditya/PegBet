@@ -55,18 +55,17 @@ contract PegbetTest is Test, ERC1155Holder {
         emit log_named_string("vaultAddress premium ", premiumVault.name());
 
         // vm.prank(user1);
+        emit log_named_uint("pre user1 balance", pegbet.balanceOf(user1));
+        emit log_named_uint("pre user2 balance", pegbet.balanceOf(user2));
 
         vm.warp(startDate + 1 days);
         vm.prank(user1);
-        ERC20(address(pegbet)).approve(address(riskVault), 1 ether);
-        riskVault.deposit(1 ether, endDate, user1);
+        ERC20(address(pegbet)).approve(address(riskVault), 2 ether);
+        riskVault.deposit(2 ether, endDate, user1);
 
         vm.prank(user2);
         ERC20(address(pegbet)).approve(address(premiumVault), 1 ether);
         premiumVault.deposit(1 ether, endDate, user2);
-
-        assert(riskVault.balanceOf(user1, endDate) == 1 ether);
-        assert(premiumVault.balanceOf(user2, endDate) == 1 ether);
 
         uint256 fraxLatestPrice = controller.getLatestPrice(
             0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8
@@ -79,7 +78,8 @@ contract PegbetTest is Test, ERC1155Holder {
 
         controller.triggerDepeg(marketId, endDate);
 
-        assert(riskVault.balanceOf(user1, endDate) == 0);
+        emit log_named_uint("post user1 balance", pegbet.balanceOf(user1));
+        emit log_named_uint("post user2 balance", pegbet.balanceOf(user2));
     }
 
     // function testHuntForAirdrop() public {

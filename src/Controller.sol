@@ -34,6 +34,8 @@ contract Controller {
     event Log(string message);
     event Log2(uint80 message);
 
+    event DepegTriggered(uint256 marketId, uint256 epochId);
+
     function getLatestPrice(address assetAddress) public returns (uint256) {
         // address usdcAddress = 0x3E7d1eAB13ad0104d2750B8863b489D65364e32D;
         AggregatorV3Interface priceFeed = AggregatorV3Interface(assetAddress);
@@ -76,12 +78,21 @@ contract Controller {
         uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(epochId);
         uint256 riskFinalTVL = riskVault.vaultFinalTVL(epochId);
 
+        riskVault.transferAssets(epochId, address(premiumVault), riskFinalTVL);
+        premiumVault.transferAssets(
+            epochId,
+            address(riskVault),
+            premiumFinalTVL
+        );
+
         premiumVault.setVaultClaimableTVL(epochId, riskFinalTVL);
         riskVault.setVaultClaimableTVL(epochId, premiumFinalTVL);
 
         // End Epoch after depeging
         riskVault.setEpochState(epochId, 2);
         premiumVault.setEpochState(epochId, 2);
+
+        emit DepegTriggered(marketId, epochId);
     }
 
     function expireEpochWithoutDepeg(uint256 marketId) public onlyOwner {

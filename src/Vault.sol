@@ -116,6 +116,15 @@ contract Vault is PartialFungibleVault, ReentrancyGuard {
         }
     }
 
+    function transferAssets(
+        uint256 epochId,
+        address receiver,
+        uint256 amount
+    ) public onlyController {
+        require(isEpochValid[epochId] == true, "Vault: market is not valid");
+        asset.transfer(receiver, amount);
+    }
+
     function withdraw(
         uint256 amount,
         uint256 epochId,
