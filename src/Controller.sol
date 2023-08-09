@@ -156,11 +156,18 @@ contract Controller {
 
     function expireNullEpoch(uint256 marketId) public onlyOwner {
         VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
-        address payable[] memory marketVaults = vaultFactory
+
+        address payable[] memory vaultsAddresses = vaultFactory
             .getVaultsForMaketId(marketId);
 
-        Vault riskVault = Vault(marketVaults[0]);
-        Vault premiumVault = Vault(marketVaults[1]);
+        if (
+            vaultsAddresses[0] == address(0) || vaultsAddresses[1] == address(0)
+        ) {
+            revert MarketDoesNotExist();
+        }
+
+        Vault riskVault = Vault(payable(vaultsAddresses[0]));
+        Vault premiumVault = Vault(payable(vaultsAddresses[1]));
 
         uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(marketId);
         uint256 riskFinalTVL = riskVault.vaultFinalTVL(marketId);
