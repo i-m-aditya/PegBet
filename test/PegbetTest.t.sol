@@ -286,7 +286,7 @@ contract PegbetTest is Test, ERC1155Holder {
         );
 
         uint256 fraxPgbTokensOfUser1 = riskVault.balanceOf(user1, endDate);
-        uint256 fraxPgbTokensOfUser2 = premiumVault.balanceOf(user2, endDate);
+        // uint256 fraxPgbTokensOfUser2 = premiumVault.balanceOf(user2, endDate);
 
         vm.warp(endDate + 1 days);
 
