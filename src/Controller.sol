@@ -151,7 +151,10 @@ contract Controller {
         premiumVault.setEpochState(epochId, 1);
     }
 
-    function expireNullEpoch(uint256 marketId) public onlyOwner {
+    function expireEpochWithSingleSideLiquidity(
+        uint256 marketId,
+        uint256 epochId
+    ) public onlyOwner {
         VaultFactory vaultFactory = VaultFactory(vaultFactoryAddress);
 
         address payable[] memory vaultsAddresses = vaultFactory
@@ -166,14 +169,14 @@ contract Controller {
         Vault riskVault = Vault(payable(vaultsAddresses[0]));
         Vault premiumVault = Vault(payable(vaultsAddresses[1]));
 
-        uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(marketId);
-        uint256 riskFinalTVL = riskVault.vaultFinalTVL(marketId);
+        uint256 premiumFinalTVL = premiumVault.vaultFinalTVL(epochId);
+        uint256 riskFinalTVL = riskVault.vaultFinalTVL(epochId);
 
-        premiumVault.setVaultClaimableTVL(marketId, premiumFinalTVL);
-        riskVault.setVaultClaimableTVL(marketId, riskFinalTVL);
+        premiumVault.setVaultClaimableTVL(epochId, premiumFinalTVL);
+        riskVault.setVaultClaimableTVL(epochId, riskFinalTVL);
 
-        riskVault.setEpochState(marketId, 1);
-        premiumVault.setEpochState(marketId, 1);
+        riskVault.setEpochState(epochId, 1);
+        premiumVault.setEpochState(epochId, 1);
     }
 
     function stopDepositsAndStartEpoch(uint256 marketId) public onlyOwner {
