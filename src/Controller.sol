@@ -144,14 +144,11 @@ contract Controller {
             premiumFinalTVL
         );
 
-        premiumVault.setVaultClaimableTVL(marketId, 0);
-        riskVault.setVaultClaimableTVL(
-            marketId,
-            premiumFinalTVL + riskFinalTVL
-        );
+        premiumVault.setVaultClaimableTVL(epochId, 0);
+        riskVault.setVaultClaimableTVL(epochId, premiumFinalTVL + riskFinalTVL);
 
-        riskVault.setEpochState(marketId, 1);
-        premiumVault.setEpochState(marketId, 1);
+        riskVault.setEpochState(epochId, 1);
+        premiumVault.setEpochState(epochId, 1);
     }
 
     function expireNullEpoch(uint256 marketId) public onlyOwner {
