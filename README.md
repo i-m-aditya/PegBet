@@ -1,3 +1,3 @@
-# PegBet: Bet whether an asset will depeg or not
+# PegBet: Speculate on pegged currencies
 
 ## 🚧 Work in Progress 🚧
